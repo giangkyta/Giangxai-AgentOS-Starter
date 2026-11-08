@@ -67,4 +67,4 @@ Khung do **Giang (GiangxAI)** chia sẻ miễn phí · [giangxai.com](https://gi
 
 Thấy hữu ích thì ghé kênh YouTube [@giangxai.official](https://www.youtube.com/@giangxai.official) xem cách mình dùng đội Agent mỗi ngày.
 
-Giấy phép MIT, xem `LICENSE`.
+Giấy phép MIT, xem `LICENSE`. Ghi công phần mượn: `THIRD_PARTY_NOTICES.md`.
