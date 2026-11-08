@@ -1,0 +1,79 @@
+# agentos: Super -> Lead -> Worker, based on slp.
+# Tôi (the Human) talks only to Super, the session opened in the hub directory that founds the team.
+# Super opens one Lead per project or lane, in that project's directory. A Lead splits its lane and
+# spawns Workers. Each Worker role runs its own model (roles: in ~/.piggery/config.yaml).
+# Routing is the fence: a Worker reaches only its Lead, a Lead reaches Super and its Workers.
+template: agentos
+summary: "Đội Agent: Super giữ mục tiêu và nói chuyện với tôi, mỗi dự án một Lead chia việc, Worker viết / nghiên cứu / kỹ thuật / kiểm tra chạy model riêng."
+auto_join_role: super   # the founder's role (the Super session)
+roles:
+  super:
+    description: Settles the day's goals with the Human, opens one Lead per project with a brief, watches for drift, and brings back what the Human must decide.
+    instructions_file: prompts/agentos/super.md
+    tools: [send, inbox, who, agent]
+    can_spawn: [lead]
+    can_set_cwd: true
+    spawn:
+      allow_tools: []
+  lead:
+    description: Owns one project's plan, splits it into tasks for Workers, gets every result cross-checked, judges the evidence, and hands back to Super.
+    instructions_file: prompts/agentos/lead.md
+    tools: [send, inbox, who, agent]
+    can_spawn: [viet, nghien-cuu, ky-thuat, kiem-tra]
+    can_set_cwd: true
+    spawn:
+      allow_tools: []
+  viet:
+    description: Writes website and Facebook drafts to files, following the skill the Lead names. Never publishes.
+    instructions_file: prompts/agentos/viet.md
+    tools: [send, inbox, who]
+    can_spawn: []
+    can_set_cwd: false
+    spawn:
+      allow_tools: []
+  nghien-cuu:
+    description: Researches real sources and writes video scripts, citing a source for each key fact.
+    instructions_file: prompts/agentos/nghien-cuu.md
+    tools: [send, inbox, who]
+    can_spawn: []
+    can_set_cwd: false
+    spawn:
+      allow_tools: []
+  ky-thuat:
+    description: Does code and web technical tasks in scope, proves them by running them. Never deploys or pushes.
+    instructions_file: prompts/agentos/ky-thuat.md
+    tools: [send, inbox, who]
+    can_spawn: []
+    can_set_cwd: false
+    spawn:
+      allow_tools: []
+  kiem-tra:
+    description: Reviews another Worker's result against the task, SOP, sources and voice; reports PASS or NEEDS-FIX with each issue. Does not edit.
+    instructions_file: prompts/agentos/kiem-tra.md
+    tools: [send, inbox, who]
+    can_spawn: []
+    can_set_cwd: false
+    spawn:
+      allow_tools: []
+routing:
+  - {from: super, to: lead, allow: true, cc: []}
+  - {from: lead, to: super, allow: true, cc: []}
+  - {from: lead, to: viet, allow: true, cc: []}
+  - {from: lead, to: nghien-cuu, allow: true, cc: []}
+  - {from: lead, to: ky-thuat, allow: true, cc: []}
+  - {from: lead, to: kiem-tra, allow: true, cc: []}
+  - {from: viet, to: lead, allow: true, cc: []}
+  - {from: nghien-cuu, to: lead, allow: true, cc: []}
+  - {from: ky-thuat, to: lead, allow: true, cc: []}
+  - {from: kiem-tra, to: lead, allow: true, cc: []}
+timers:
+  - {on: viet, notify: reports_to, working_for: 20m}
+  - {on: nghien-cuu, notify: reports_to, working_for: 20m}
+  - {on: ky-thuat, notify: reports_to, working_for: 20m}
+  - {on: kiem-tra, notify: reports_to, working_for: 20m}
+  - {on: lead, notify: reports_to, working_for: 30m}
+limits:                  # none: no limit
+  depth: 2                 # Super -> Lead -> Worker, no deeper
+  concurrency: 6           # live workers at once (cost cap; raise once it runs well)
+  messages_per_participant_per_minute: 30
+  max_respawn_per_hour: 6

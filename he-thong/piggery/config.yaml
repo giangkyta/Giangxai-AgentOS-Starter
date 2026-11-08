@@ -1,0 +1,40 @@
+# piggery daemon settings: every key with its default. Read each time it is needed: an edit counts from the next spawn or session, no restart.
+# harness of a worker whose role and spawner name none: pi, claude, codex, omp, dsh, opencode
+harness: claude
+# gate of a new solo session: open, or closed (other teams and solos neither see nor mail it, and it sees none of them); a solo or a team's gate changes it later with agent action=gate_close / gate_open
+gate: open
+gc:
+  # gc a team closed longer than this, with its run logs (14d, 36h, or off)
+  closed_after: 14d
+  # delete gc archives older than this (30d, or off)
+  archive_keep: 30d
+display:
+  # columns top and ps show, in order; remove one to hide it (name is always shown); read on every run, no restart
+  columns: [role, state, harness, model, ctx, turns, unacked, age, since, cwd]
+spawn:
+  # absolute directories outside a team's root where a worker may be spawned with a cwd (the root and its repo's git worktrees always may)
+  # thư mục các dự án mà Lead được vào làm. Thêm dự án: xóa "[]", rồi viết bên dưới mỗi dự án một dòng "    - /đường/dẫn/dự-án"
+  allowed_roots: []
+update:
+  # ask GitHub once a day whether a newer piggery release is out, and say so in top, setup and update --check; nothing is installed (a dev build never asks)
+  check: true
+# your prompt files by role, added to those roles' cards: - {file: rules/code.md, roles: [peer, solo, lead-peer/lead]} (file: relative to this directory or absolute; the list and the file are read at each session start)
+prompts:
+  - file: rules/general-policy.md
+    roles: ["lead-peer/*", "slp/*", "agentos/*"]
+  # noi quy doi agentos (nam trong thu muc tram/luat, co lich su git)
+  - file: __TRAM__/luat/chung.md
+    roles: ["agentos/*"]
+  - file: __TRAM__/luat/super.md
+    roles: ["agentos/super"]
+  - file: __TRAM__/luat/lead.md
+    roles: ["agentos/lead"]
+  - file: __TRAM__/luat/worker.md
+    roles: ["agentos/viet", "agentos/nghien-cuu", "agentos/ky-thuat", "agentos/kiem-tra"]
+# model theo vai (doi agentos). Super la phien ban mo tren Paseo, chon model o Paseo.
+roles:
+  agentos/lead: {harness: codex, model: gpt-6.1-sol}
+  agentos/viet: {harness: codex, model: inherit}
+  agentos/ky-thuat: {harness: codex, model: inherit}
+  agentos/nghien-cuu: {harness: claude, model: opus}
+  agentos/kiem-tra: {harness: claude, model: opus}
